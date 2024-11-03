@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from decimal import Decimal
 from sqlalchemy import Numeric, DateTime
 from sqlalchemy.orm import mapped_column, Mapped
@@ -42,9 +42,11 @@ class TradeReportEntity(Base):
 
     created_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    updated_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_on: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.oil_id = self.exchange_product_id[:4]
         self.delivery_basis_id = self.exchange_product_id[4:7]
