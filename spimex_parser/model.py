@@ -1,49 +1,43 @@
-from typing import Annotated, Any
-from decimal import Decimal
-from sqlalchemy import Numeric, DateTime
-from sqlalchemy.orm import mapped_column, Mapped
+from typing import Any
 from datetime import date, datetime
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import DateTime, String
+from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
 
 
 class Base(DeclarativeBase):
     pass
 
 
-intpk = Annotated[int, mapped_column(primary_key=True)]
-currency = Annotated[Decimal, mapped_column(Numeric(20, 2))]
-
-
 class TradeReportEntity(Base):
 
     __tablename__ = "trade_report_entities"
 
-    id: Mapped[intpk]
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    exchange_product_id: Mapped[str]
+    exchange_product_id: Mapped[str] = mapped_column(String(length=11))
 
-    exchange_product_name: Mapped[str]
+    exchange_product_name: Mapped[str] = mapped_column(String(length=200))
 
-    delivery_basis_name: Mapped[str]
+    delivery_basis_name: Mapped[str] = mapped_column(String(length=50))
 
     volume: Mapped[int]
 
-    total: Mapped[currency]
+    total: Mapped[int]
 
     count: Mapped[int]
 
     date: Mapped[date]
 
-    oil_id: Mapped[str]
+    oil_id: Mapped[str] = mapped_column(String(length=4))
 
-    delivery_basis_id: Mapped[str]
+    delivery_basis_id: Mapped[str] = mapped_column(String(length=3))
 
-    delivery_type_id: Mapped[str]
+    delivery_type_id: Mapped[str] = mapped_column(String(length=1))
 
-    created_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
 
     updated_on: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=datetime.now(), onupdate=datetime.now()
     )
 
     def __init__(self, **kwargs: Any) -> None:
