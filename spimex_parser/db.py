@@ -1,5 +1,7 @@
-from model import TradeReportEntity
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from model import TradeReportEntity
+
 
 
 async def add_all(

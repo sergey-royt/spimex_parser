@@ -1,11 +1,13 @@
 import asyncio
 from itertools import chain
 from typing import Any
-from file_downloader import AsyncMemoryFileManager
+
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from xls_parser import parse
+
+from file_downloader import AsyncMemoryFileManager
 from model import Base, TradeReportEntity
 from link_collector import get_reports_urls
-from xls_parser import parse
 from db import add_all
 from setings import DATABASE_URL
 

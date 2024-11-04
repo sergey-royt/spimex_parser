@@ -1,6 +1,8 @@
 from datetime import datetime
 from io import BytesIO
+
 import xlrd
+
 from model import TradeReportEntity
 
 
