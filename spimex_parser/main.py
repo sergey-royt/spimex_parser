@@ -3,13 +3,16 @@ from itertools import chain
 from typing import Any
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from xls_parser import parse
 
 from file_downloader import AsyncMemoryFileManager
 from model import Base, TradeReportEntity
 from link_collector import get_reports_urls
 from db import add_all
 from setings import DATABASE_URL
+from xls_parser import SpimexXlsParser
+
+
+SITE_URL = "https://spimex.com/{}"
 
 
 engine = create_async_engine(DATABASE_URL, echo=True)
@@ -36,7 +39,8 @@ async def main() -> None:
 
 async def download_and_parse(urls: list[str]) -> list[TradeReportEntity]:
     """
-    Create and launch tasks for downloading and parsing each given url from list
+    Create and launch tasks for downloading
+    and parsing each given url from list
     Return list of TradeReportEntities
     """
 
@@ -52,10 +56,8 @@ async def download_and_parse_single(url: str) -> Any:
     Download and parse trade report from given url
     """
 
-    url_schema = "https://spimex.com/{}"
-
-    async with AsyncMemoryFileManager(url_schema.format(url)) as file:
-        return await parse(file)
+    async with AsyncMemoryFileManager(SITE_URL.format(url)) as file:
+        return await SpimexXlsParser(file).parse()
 
 
 if __name__ == "__main__":

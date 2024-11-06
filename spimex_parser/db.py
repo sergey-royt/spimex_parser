@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from model import TradeReportEntity
 
 
-
 async def add_all(
-    entities: list[TradeReportEntity], async_session: async_sessionmaker[AsyncSession]
+    entities: list[TradeReportEntity],
+    async_session: async_sessionmaker[AsyncSession],
 ) -> None:
     """
     Add all TradeReportEntities from given list to database

@@ -6,6 +6,14 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 
+UP_TO_DATE = datetime(2022, 12, 31)
+PAGE_TO_PARSE_RANGE = range(1, 48)
+DATE_SPAN_IDX = 0
+URL_SCHEMA = (
+    "https://spimex.com/markets/oil_products/trades/results/?page=page-{}"
+)
+
+
 async def download_page_content(url: str) -> bytes:
     """
     Make request to given url and return the response content
@@ -33,9 +41,9 @@ async def parse_page(page_content: bytes) -> list[str]:
     )
     file_urls = []
     for block in blocks:
-        file_date_str = block.span.contents[0]
+        file_date_str = block.span.contents[DATE_SPAN_IDX]
         file_date = datetime.strptime(file_date_str, "%d.%m.%Y")
-        if file_date > datetime(2022, 12, 31):
+        if file_date > UP_TO_DATE:
             file_link = block.a["href"]
             file_urls.append(file_link)
         else:
@@ -49,12 +57,9 @@ async def get_reports_urls() -> list[str]:
     and return list of all trade report urls
     """
 
-    url_schema = (
-        "https://spimex.com/markets/oil_products" "/trades/results/?page=page-{}"
-    )
-
     download_pages_content_tasks = [
-        download_page_content(url_schema.format(i)) for i in range(1, 48)
+        download_page_content(URL_SCHEMA.format(i))
+        for i in PAGE_TO_PARSE_RANGE
     ]
 
     pages_content = await asyncio.gather(*download_pages_content_tasks)

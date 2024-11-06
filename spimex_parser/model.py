@@ -35,7 +35,9 @@ class TradeReportEntity(Base):
 
     delivery_type_id: Mapped[str] = mapped_column(String(length=1))
 
-    created_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+    created_on: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now()
+    )
 
     updated_on: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), onupdate=datetime.now()
