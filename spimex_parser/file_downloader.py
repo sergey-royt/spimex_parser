@@ -1,12 +1,13 @@
 from typing import Optional
 import aiohttp
+from aiohttp import ClientResponseError
 from io import BytesIO
 
 
 class AsyncMemoryFileManager:
     """
     Context manager which asynchronously download files
-    and return BytesIO file object
+    and return BytesIO file object or None if download failed
     """
 
     def __init__(self, url: str) -> None:
@@ -15,10 +16,13 @@ class AsyncMemoryFileManager:
 
     async def __aenter__(self) -> BytesIO | None:
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.url) as response:
-                response.raise_for_status()
-                self.file_content = BytesIO(await response.read())
-                return self.file_content
+            try:
+                async with session.get(self.url) as response:
+                    response.raise_for_status()
+                    self.file_content = BytesIO(await response.read())
+                    return self.file_content
+            except ClientResponseError:
+                return None
 
     async def __aexit__(
         self,

@@ -1,17 +1,14 @@
 import asyncio
-from itertools import chain
-from typing import Any
-from aiohttp import ClientResponseError
+from datetime import datetime
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from file_downloader import AsyncMemoryFileManager
-from model import Base, TradeReportEntity
+from model import Base
 from link_generator import generate_report_urls
-from db import add_all
+from db import insert_data_frame
 from setings import DATABASE_URL
-from xls_parser import SpimexXlsParser
-
+from xls_parser import parse_xls
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -25,17 +22,18 @@ async def main() -> None:
     and create TradeReportEntity objects from it.
     Add all TradeReportEntities to database.
     """
-
+    s = datetime.now()
     files_urls = generate_report_urls()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-    entities = await download_and_parse(files_urls)
-    await add_all(entities, async_session)
+    await download_and_parse(files_urls)
     await engine.dispose()
+    e = datetime.now()
+    print(f"Execution time: {(e - s).seconds} seconds")
 
 
-async def download_and_parse(urls: list[str]) -> list[TradeReportEntity]:
+async def download_and_parse(urls: list[str]) -> None:
     """
     Create and launch tasks for downloading
     and parsing each given url from list
@@ -44,21 +42,20 @@ async def download_and_parse(urls: list[str]) -> list[TradeReportEntity]:
 
     tasks = []
     for url in urls:
-        tasks.append(download_and_parse_single(url))
-    entities = await asyncio.gather(*tasks)
-    return list(chain.from_iterable(entities))
+        tasks.append(process_report(url))
+    await asyncio.gather(*tasks)
 
 
-async def download_and_parse_single(url: str) -> Any:
+async def process_report(url: str) -> None:
     """
-    Download and parse trade report from given url
+    Download, parse and add to db
+    trade report from given url
     """
 
-    try:
-        async with AsyncMemoryFileManager(url) as file:
-            return SpimexXlsParser(file).parse()
-    except ClientResponseError:
-        return []
+    async with AsyncMemoryFileManager(url) as file:
+        if file:
+            report = await parse_xls(file)
+            await insert_data_frame(report, async_session)
 
 
 if __name__ == "__main__":

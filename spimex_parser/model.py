@@ -30,9 +30,3 @@ class TradeReportEntity(Base):
     updated_on: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), onupdate=datetime.now()
     )
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.oil_id = self.exchange_product_id[:4]
-        self.delivery_basis_id = self.exchange_product_id[4:7]
-        self.delivery_type_id = self.exchange_product_id[-1]
