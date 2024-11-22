@@ -13,7 +13,7 @@ class AsyncMemoryFileManager:
         self.url: str = url
         self.file_content: Optional[BytesIO] = None
 
-    async def __aenter__(self) -> BytesIO:
+    async def __aenter__(self) -> BytesIO | None:
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url) as response:
                 response.raise_for_status()

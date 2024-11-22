@@ -1,18 +1,16 @@
 import asyncio
 from itertools import chain
 from typing import Any
+from aiohttp import ClientResponseError
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from file_downloader import AsyncMemoryFileManager
 from model import Base, TradeReportEntity
-from link_collector import get_reports_urls
+from link_generator import generate_report_urls
 from db import add_all
 from setings import DATABASE_URL
 from xls_parser import SpimexXlsParser
-
-
-SITE_URL = "https://spimex.com/{}"
 
 
 engine = create_async_engine(DATABASE_URL, echo=True)
@@ -28,7 +26,7 @@ async def main() -> None:
     Add all TradeReportEntities to database.
     """
 
-    files_urls = await get_reports_urls()
+    files_urls = generate_report_urls()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -56,8 +54,11 @@ async def download_and_parse_single(url: str) -> Any:
     Download and parse trade report from given url
     """
 
-    async with AsyncMemoryFileManager(SITE_URL.format(url)) as file:
-        return await SpimexXlsParser(file).parse()
+    try:
+        async with AsyncMemoryFileManager(url) as file:
+            return SpimexXlsParser(file).parse()
+    except ClientResponseError:
+        return []
 
 
 if __name__ == "__main__":

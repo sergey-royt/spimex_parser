@@ -12,8 +12,8 @@ aiohttp = "^3.10.10"
 sqlalchemy = "^2.0.36"
 asyncpg = "^0.30.0"
 xlrd = "^2.0.1"
-beautifulsoup4 = "^4.12.3"
 python-dotenv = "^1.0.1"
+pandas = "^2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
