@@ -22,15 +22,12 @@ async def main() -> None:
     and create TradeReportEntity objects from it.
     Add all TradeReportEntities to database.
     """
-    s = datetime.now()
     files_urls = generate_report_urls()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     await download_and_parse(files_urls)
     await engine.dispose()
-    e = datetime.now()
-    print(f"Execution time: {(e - s).seconds} seconds")
 
 
 async def download_and_parse(urls: list[str]) -> None:

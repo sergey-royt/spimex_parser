@@ -39,30 +39,36 @@ async def parse_xls(file: BytesIO) -> pd.DataFrame:
 
     df = await asyncio.to_thread(pd.read_excel, file)
     trading_date = await asyncio.to_thread(parse_date, df)
-    table_beginning_idx = await asyncio.to_thread(parse_table_beginning_idx, df)
+    table_beginning_idx = await asyncio.to_thread(
+        parse_table_beginning_idx, df
+    )
 
     df = df.iloc[
-         table_beginning_idx:,
-         [EXCHANGE_PRODUCT_ID_IDX,
-          EXCHANGE_PRODUCT_NAME_IDX,
-          DELIVERY_BASIS_NAME_IDX,
-          VOLUME_IDX, TOTAL_IDX, COUNT_IDX]].reset_index(
-        drop=True)
-    df.columns = pd.Index(
-        df.iloc[DATAFRAME_START_IDX].str.replace("\n", " ")
-    )
+        table_beginning_idx:,
+        [
+            EXCHANGE_PRODUCT_ID_IDX,
+            EXCHANGE_PRODUCT_NAME_IDX,
+            DELIVERY_BASIS_NAME_IDX,
+            VOLUME_IDX,
+            TOTAL_IDX,
+            COUNT_IDX,
+        ],
+    ].reset_index(drop=True)
+    df.columns = pd.Index(df.iloc[DATAFRAME_START_IDX].str.replace("\n", " "))
     df = df.drop([DATAFRAME_START_IDX, DATAFRAME_START_IDX + 1])
-    df = df[df.iloc[:, COUNT_IDX] != '-'].dropna().reset_index(drop=True)
+    df = df[df.iloc[:, COUNT_IDX] != "-"].dropna().reset_index(drop=True)
 
-    df = df.rename(columns={
-        "Код Инструмента": "exchange_product_id",
-        "Наименование Инструмента": "exchange_product_name",
-        "Базис поставки": "delivery_basis_name",
-        "Объем Договоров в единицах измерения": "volume",
-        "Обьем Договоров, руб.": "total",
-        "Количество Договоров, шт.": "count",
-    })
-    df['date'] = trading_date
+    df = df.rename(
+        columns={
+            "Код Инструмента": "exchange_product_id",
+            "Наименование Инструмента": "exchange_product_name",
+            "Базис поставки": "delivery_basis_name",
+            "Объем Договоров в единицах измерения": "volume",
+            "Обьем Договоров, руб.": "total",
+            "Количество Договоров, шт.": "count",
+        }
+    )
+    df["date"] = trading_date
     for col in ["volume", "total", "count"]:
         df[col] = df[col].fillna(0).astype(int)
     df["oil_id"] = df["exchange_product_id"].apply(
@@ -82,9 +88,7 @@ def parse_date(df: pd.DataFrame) -> date:
     Retrieve trading date value from report data frame
     """
 
-    date_line = df.iloc[
-        DATE_LINE_ROW_INDEX, DATE_LINE_COLUMN_INDEX
-    ]
+    date_line = df.iloc[DATE_LINE_ROW_INDEX, DATE_LINE_COLUMN_INDEX]
     date_part = date_line.split(": ")[DATE_LINE_DATE_INDEX]
     trading_date = datetime.strptime(date_part, "%d.%m.%Y").date()
     return trading_date
