@@ -33,8 +33,7 @@ async def main() -> None:
 async def download_and_parse(urls: list[str]) -> None:
     """
     Create and launch tasks for downloading
-    and parsing each given url from list
-    Return list of TradeReportEntities
+    and parsing each given url from list.
     """
 
     tasks = []
