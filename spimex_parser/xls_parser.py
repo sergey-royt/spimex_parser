@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, date
 from io import BytesIO
 
@@ -31,17 +30,15 @@ DELIVERY_BASIS_ID_END_IDX = 7
 DELIVERY_TYPE_ID_IDX = -1
 
 
-async def parse_xls(file: BytesIO) -> pd.DataFrame:
+def parse_xls(file: BytesIO) -> pd.DataFrame:
     """
     Parse xls file and return data frame prepared
     for adding to database
     """
 
-    df = await asyncio.to_thread(pd.read_excel, file)
-    trading_date = await asyncio.to_thread(parse_date, df)
-    table_beginning_idx = await asyncio.to_thread(
-        parse_table_beginning_idx, df
-    )
+    df = pd.read_excel(file)
+    trading_date = parse_date(df)
+    table_beginning_idx = parse_table_beginning_idx(df)
 
     df = df.iloc[
         table_beginning_idx:,

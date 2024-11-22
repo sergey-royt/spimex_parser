@@ -1,14 +1,13 @@
 import asyncio
-from datetime import datetime
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-
 from file_downloader import AsyncMemoryFileManager
-from model import Base
 from link_generator import generate_report_urls
+from xls_parser import parse_xls
+
 from db import insert_data_frame
 from setings import DATABASE_URL
-from xls_parser import parse_xls
+from model import Base
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -50,7 +49,7 @@ async def process_report(url: str) -> None:
 
     async with AsyncMemoryFileManager(url) as file:
         if file:
-            report = await parse_xls(file)
+            report = parse_xls(file)
             await insert_data_frame(report, async_session)
 
 

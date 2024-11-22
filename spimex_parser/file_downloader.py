@@ -1,7 +1,8 @@
 from typing import Optional
+from io import BytesIO
+
 import aiohttp
 from aiohttp import ClientResponseError
-from io import BytesIO
 
 
 class AsyncMemoryFileManager:
